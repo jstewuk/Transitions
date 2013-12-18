@@ -9,9 +9,11 @@
 #import "MasterViewController.h"
 
 #import "DetailViewController.h"
+#import "AnimationController.h"
 
-@interface MasterViewController ()
+@interface MasterViewController () <UIViewControllerTransitioningDelegate, UINavigationControllerDelegate>
 @property (nonatomic, copy) NSArray *objects;
+@property (nonatomic, strong) AnimationController *animationController;
 @end
 
 @implementation MasterViewController
@@ -24,6 +26,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    self.navigationController.delegate = self;
+    
     self.objects = @[
                      @"Transition"
                      ];
@@ -33,6 +38,13 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (AnimationController *)animationController {
+    if (_animationController == nil) {
+        _animationController = [[AnimationController alloc] init];
+    }
+    return _animationController;
 }
 
 #pragma mark - Table View
@@ -56,12 +68,6 @@
     return cell;
 }
 
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
-}
-
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
     if ([[segue identifier] isEqualToString:@"showDetail"]) {
@@ -69,6 +75,17 @@
         NSString *object = self.objects[indexPath.row];
         [[segue destinationViewController] setDetailItem:object];
     }
+}
+
+#pragma mark - UIViewControllerTransitioningDelegate
+
+- (id<UIViewControllerAnimatedTransitioning>)navigationController:(UINavigationController *)navigationController
+                                  animationControllerForOperation:(UINavigationControllerOperation)operation
+                                               fromViewController:(UIViewController *)fromVC
+                                                 toViewController:(UIViewController *)toVC
+{
+    self.animationController.reverse = (operation == UINavigationControllerOperationPop);
+    return self.animationController;
 }
 
 @end
